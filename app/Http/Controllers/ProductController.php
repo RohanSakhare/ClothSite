@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\ProductImage;
 
 class ProductController extends Controller
 {
@@ -23,7 +24,13 @@ class ProductController extends Controller
 
     public function show(Product $product)
     {
-        $product->load('images', 'category');
+        $product->load([
+            'category',
+            'images' => function ($query) {
+                $query->orderBy('position');
+            }
+        ]);
+
         return view('frontend.products.show', compact('product'));
     }
 }

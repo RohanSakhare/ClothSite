@@ -31,8 +31,28 @@ class ProductController extends Controller
             ->addIndexColumn()
 
             ->addColumn('image', function ($row) {
-                if ($row->image && file_exists(public_path('storage/' . $row->image))) {
-                    return '<img src="' . asset('storage/' . $row->image) . '" class="product-thumb">';
+                $images = $row->images;
+                if ($images->count()) {
+                    $html = '';
+                    $group = 'product-' . $row->id;
+
+                    foreach ($images as $index => $img) {
+                        if (file_exists(public_path('storage/' . $img->image))) {
+                            // show up to 3 thumbs, keep others hidden so Fancybox has the full gallery
+                            $visible = $index < 3 ? '' : 'style="display:none"';
+                            $idAttr = $index === 0 ? 'id="preview-' . $group . '"' : '';
+
+                            $html .= '<a href="' . asset('storage/' . $img->image) . '" data-fancybox="' . $group . '" class="admin-fancybox" data-caption="' . htmlspecialchars($row->name, ENT_QUOTES) . '" ' . $idAttr . ' ' . $visible . '>'
+                                . '<img src="' . asset('storage/' . $img->image) . '" class="product-thumb" alt="' . htmlspecialchars($row->name, ENT_QUOTES) . '" style="width:40px;height:40px;object-fit:cover;border-radius:6px;margin-right:6px">'
+                                . '</a>';
+                        }
+                    }
+
+                    if ($images->count() > 3) {
+                        $html .= '<span class="more-badge" onclick="document.getElementById(\'preview-' . $group . '\').click();">+' . ($images->count() - 3) . '</span>';
+                    }
+
+                    return $html;
                 }
                 return '<span class="text-muted">No Image</span>';
             })
@@ -46,16 +66,19 @@ class ProductController extends Controller
             ->addColumn('action', function ($row) {
                 return '
         <div class="d-flex gap-2">
+            <button type="button" class="btn btn-sm btn-info px-3" onclick="showProduct(' . $row->id . ')">
+                Show
+            </button>
             <a href="' . route('admin.products.edit', $row->id) . '"
                class="btn btn-sm btn-warning px-3">
                 Edit
             </a>
 
-             <form action="' . route('admin.products.destroy', $row->id) . '"
+             <form id="delete-form-' . $row->id . '" action="' . route('admin.products.destroy', $row->id) . '"
                   method="POST"
                   class="delete-form">
                 ' . csrf_field() . method_field('DELETE') . '
-                <button type="submit" class="btn btn-sm btn-danger" onclick="confirmDelete(' . $row->id . ')">
+                <button type="button" class="btn btn-sm btn-danger" onclick="confirmDelete(' . $row->id . ')">
                     Delete
                 </button>
             </form>
@@ -124,9 +147,15 @@ class ProductController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Product $product)
     {
-        //
+        // Return an HTML fragment for the product details modal (AJAX expected)
+        if (request()->ajax()) {
+            return view('dashboard.products.partials.show', compact('product'))->render();
+        }
+
+        // Fallback: show a dedicated page (optional)
+        return view('dashboard.products.show', compact('product'));
     }
 
     /**
@@ -134,6 +163,7 @@ class ProductController extends Controller
      */
     public function edit(Product $product)
     {
+        $product->load('variants', 'images', 'category');
         $categories = Category::all();
         return view('dashboard.products.edit', compact('product', 'categories'));
     }
@@ -186,7 +216,7 @@ class ProductController extends Controller
             ->route('admin.products.index')
             ->with('success', 'Product updated successfully');
     }
-  
+
 
     /**
      * Remove the specified resource from storage.

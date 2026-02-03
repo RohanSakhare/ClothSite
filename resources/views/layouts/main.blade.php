@@ -13,6 +13,7 @@
     <meta name="description" content="Cloth Shop">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('frontend/css/vendor.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css" />
     <link rel="stylesheet" type="text/css" href="{{ asset('frontend/style.css') }}">
@@ -24,7 +25,7 @@
         rel="stylesheet">
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" />
 
 </head>
 
@@ -430,7 +431,7 @@
                         </li>
                         <li class="d-none d-lg-block">
                             <a href="{{ route('cart.index') }}" class="text-uppercase mx-3">Cart
-                                @php $cartCount = array_sum(array_column(session('cart', []), 'qty')); @endphp
+                                @php $cartCount = \App\Models\CartItem::countForCurrentUser(); @endphp
                                 <span class="cart-count">({{ $cartCount }})</span>
                             </a>
                         </li>
@@ -634,13 +635,20 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
     <script src="{{ asset('frontend/js/script.min.js') }}"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script>
     <script>
-        GLightbox({
-            touchNavigation: true,
-            loop: true
-        });
+        // Global bind for Fancybox on any [data-fancybox] anchors
+        if (typeof Fancybox !== 'undefined') {
+            Fancybox.bind('[data-fancybox]', {
+                Thumbs: { autoStart: true },
+                Toolbar: { display: ['close'] },
+                Carousel: { infinite: true, preload: 2 }
+            });
+        }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+
+    @stack('scripts')
 </body>
 
 </html>

@@ -252,14 +252,97 @@
                 </div>
             </div>
             <!-- [ Main Content ] end -->
+
+            <!-- Product preview modal -->
+            <div class="modal fade" id="productShowModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="productShowModalLabel">Product Preview</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" id="productShowModalBody">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
         </div>
         @push('scripts')
             <script>
+                // Initialize or reinitialize Fancybox for admin thumbnails
+                function initAdminFancybox() {
+                    try {
+                        if (typeof Fancybox !== 'undefined' && Fancybox && typeof Fancybox.destroy === 'function') {
+                            Fancybox.destroy();
+                        }
+                    } catch (e) {
+                        // ignore
+                    }
+
+                    if (typeof Fancybox !== 'undefined' && Fancybox) {
+                        Fancybox.bind('.admin-fancybox', {
+                            dragToClose: false,
+                            Thumbs: {
+                                autoStart: true
+                            },
+                            Toolbar: {
+                                display: ["counter", "close"]
+                            },
+                            Carousel: {
+                                preloaded: 3,
+                                center: true
+                            }
+                        });
+                    }
+
+                    // Simple in-modal image viewer state and helpers
+                    window.productModalState = window.productModalState || {};
+
+                    window.initProductModalViewer = function(id) {
+                        const container = document.getElementById('product-viewer-' + id);
+                        if (!container) return;
+                        try {
+                            const images = JSON.parse(container.getAttribute('data-images') || '[]');
+                            window.productModalState[id] = { images: images, index: 0 };
+                            const mainImg = document.getElementById('product-main-img-' + id);
+                            if (mainImg && images.length) {
+                                mainImg.src = images[0];
+                            }
+                        } catch (e) {
+                            console.error('Failed to init viewer', e);
+                        }
+                    }
+
+                    window.modalPrevImage = function(id) {
+                        const state = window.productModalState[id];
+                        if (!state || !state.images.length) return;
+                        state.index = (state.index - 1 + state.images.length) % state.images.length;
+                        const img = document.getElementById('product-main-img-' + id);
+                        if (img) img.src = state.images[state.index];
+                    }
+
+                    window.modalNextImage = function(id) {
+                        const state = window.productModalState[id];
+                        if (!state || !state.images.length) return;
+                        state.index = (state.index + 1) % state.images.length;
+                        const img = document.getElementById('product-main-img-' + id);
+                        if (img) img.src = state.images[state.index];
+                    }
+                }
+
                 $(function() {
-                    $('#products-table').DataTable({
+                    const table = $('#products-table').DataTable({
                         processing: true,
                         serverSide: true,
-                        ajax: "{{ route('admin.products.data') }}",
+                        ajax: {
+                            url: "{{ route('admin.products.data') }}",
+                            error: function(xhr, status, error) {
+                                console.error('DataTable ajax error:', xhr.responseText || error);
+                                // show a simple message in table
+                                const tableBody = $('#products-table tbody');
+                                tableBody.html('<tr><td colspan="7" class="text-danger">Failed to load data. Check the server console.</td></tr>');
+                            }
+                        },
                         columns: [{
                                 data: 'DT_RowIndex',
                                 name: 'DT_RowIndex',
@@ -272,7 +355,7 @@
                                 name: 'image',
                                 orderable: false,
                                 searchable: false,
-                                width: '80px'
+                                width: '120px'
                             },
                             {
                                 data: 'name',
@@ -301,8 +384,54 @@
                                 searchable: false,
                                 width: '160px'
                             }
-                        ]
+
+
+                        ],
+                        drawCallback: function(settings) {
+                            // Re-bind Fancybox to dynamically loaded anchors
+                            initAdminFancybox();
+                        },
+                        initComplete: function(settings, json) {
+                            // Initial bind
+                            initAdminFancybox();
+                        }
                     });
+
+                    // Re-init Fancybox when table is redrawn via API calls
+                    table.on('xhr.dt', function(e, settings, json, xhr) {
+                        initAdminFancybox();
+                    });
+
+                    // Show product details in a modal via AJAX
+                    window.showProduct = function(id) {
+                        const url = "{{ route('admin.products.show', ':id') }}".replace(':id', id);
+                        fetch(url, {
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        }).then(res => {
+                            if (!res.ok) throw new Error('Network response was not ok');
+                            return res.text();
+                        }).then(html => {
+                            document.getElementById('productShowModalBody').innerHTML = html;
+                            document.getElementById('productShowModalLabel').innerText = 'Product Preview';
+
+                            // Initialize in-modal viewer (arrow navigation)
+                            initProductModalViewer(id);
+
+                            const modalEl = document.getElementById('productShowModal');
+                            const bsModal = new bootstrap.Modal(modalEl);
+                            bsModal.show();
+
+                            // Clean up state when modal is closed
+                            const cleanup = () => {
+                                try { delete window.productModalState[id]; } catch (e) {}
+                                modalEl.removeEventListener('hidden.bs.modal', cleanup);
+                            };
+                            modalEl.addEventListener('hidden.bs.modal', cleanup);
+                        }).catch(err => {
+                            console.error('Failed to load product:', err);
+                            Swal.fire('Error', 'Failed to load product details', 'error');
+                        });
+                    }
                 });
             </script>
         @endpush

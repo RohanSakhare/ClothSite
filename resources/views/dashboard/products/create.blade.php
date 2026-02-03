@@ -295,9 +295,10 @@
 
                                             <div class="col-md-6">
                                                 <label class="form-label">Images</label>
-                                                <input type="file" name="images[]" multiple class="form-control"
+                                                <input type="file" id="imagesInput" name="images[]" multiple class="form-control"
                                                     accept="image/*">
                                                 <small class="text-muted">You can upload multiple images</small>
+                                                <div id="imagePreview" class="d-flex gap-2 mt-2 flex-wrap"></div>
                                                 @error('image')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
@@ -331,6 +332,68 @@
             </div>
             <!-- [ Main Content ] end -->
         </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const input = document.getElementById('imagesInput');
+            const preview = document.getElementById('imagePreview');
+            if (!input || !preview) return;
+
+            let filesArray = [];
+
+            function render() {
+                preview.innerHTML = '';
+                filesArray.forEach((file, idx) => {
+                    const url = URL.createObjectURL(file);
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'position-relative';
+                    wrapper.style.width = '100px';
+                    wrapper.style.height = '100px';
+                    wrapper.style.marginRight = '8px';
+                    wrapper.style.marginBottom = '8px';
+
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+                    img.style.border = '1px solid #ddd';
+                    img.style.borderRadius = '4px';
+
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'btn btn-sm btn-danger';
+                    btn.style.position = 'absolute';
+                    btn.style.top = '-8px';
+                    btn.style.right = '-8px';
+                    btn.style.borderRadius = '50%';
+                    btn.innerText = '×';
+                    btn.addEventListener('click', function() {
+                        filesArray.splice(idx, 1);
+                        updateInputFiles();
+                        render();
+                    });
+
+                    wrapper.appendChild(img);
+                    wrapper.appendChild(btn);
+                    preview.appendChild(wrapper);
+                });
+            }
+
+            function updateInputFiles() {
+                const dt = new DataTransfer();
+                filesArray.forEach(f => dt.items.add(f));
+                input.files = dt.files;
+            }
+
+            input.addEventListener('change', function(e) {
+                const newFiles = Array.from(e.target.files);
+                filesArray = filesArray.concat(newFiles);
+                updateInputFiles();
+                render();
+            });
+        });
+    </script>
 
     </main>
     <!--! ================================================================ !-->

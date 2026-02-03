@@ -11,7 +11,13 @@
             @forelse ($products as $product)
                 <div class="col-md-3 mb-4">
                     <div class="card h-100">
-                       <img src="{{ asset("storage/{$product->image}") }}" alt="{{ $product->name }}" class="card-img-top" >
+                        @php
+                            // pick first image by position if available, else fall back to product image
+                            $firstImage = $product->images->sortBy('position')->first();
+                            $imagePath = $firstImage ? $firstImage->image : ($product->image ?? null);
+                        @endphp
+
+                        <img src="{{ $imagePath ? asset('storage/' . $imagePath) : asset('frontend/images/no-image.png') }}" alt="{{ $product->name }}" class="card-img-top" style="object-fit:cover;">
 
                         <div class="card-body">
                             <h6>{{ $product->name }}</h6>

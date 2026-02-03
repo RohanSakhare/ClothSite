@@ -36,7 +36,7 @@ class CategoryController extends Controller
             ->addColumn('action', function ($row) {
                 return '
         <div class="d-flex gap-2">
-             <button 
+             <button
                         class="btn btn-sm btn-warning edit-category"
                         data-id="'.$row->id.'"
                         data-name="'.$row->name.'"
@@ -44,11 +44,11 @@ class CategoryController extends Controller
                         Edit
                     </button>
 
-             <form action="' . route('admin.categories.destroy', $row->id) . '"
+             <form id="delete-form-' . $row->id . '" action="' . route('admin.categories.destroy', $row->id) . '"
                   method="POST"
                   class="delete-form">
                 ' . csrf_field() . method_field('DELETE') . '
-                <button type="submit" class="btn btn-sm btn-danger" onclick="confirmDelete(' . $row->id . ')">
+                <button type="button" class="btn btn-sm btn-danger" onclick="confirmDelete(' . $row->id . ')">
                     Delete
                 </button>
             </form>

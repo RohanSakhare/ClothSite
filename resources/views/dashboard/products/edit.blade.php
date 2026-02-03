@@ -233,102 +233,177 @@
                         <div class="card stretch stretch-full">
                             <div class="card-body p-0">
                                 <div class="p-4">
-                                    <h5 class="mb-4">Edit Product</h5>
-                                    <form action="{{ route('admin.products.update', $product) }}" method="POST"
-                                        enctype="multipart/form-data">
-                                        @csrf
-                                        @method('PUT')
-
-                                        <div class="row g-3">
-                                            <div class="col-md-6">
-                                                <label class="form-label">Name</label>
-                                                <input type="text" name="name" value="{{ old('name', $product->name) }}"
-                                                    class="form-control @error('name') is-invalid @enderror" required>
-                                                @error('name')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
+                                <div class="row gx-4">
+                                    <div class="col-lg-8">
+                                        <div class="card mb-4">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h5 class="mb-0">Edit Product</h5>
+                                                <small class="text-muted">ID: {{ $product->id }}</small>
                                             </div>
+                                            <div class="card-body">
+                                                <form action="{{ route('admin.products.update', $product) }}" method="POST" enctype="multipart/form-data">
+                                                    @csrf
+                                                    @method('PUT')
 
-                                            <div class="col-md-6">
-                                                <label class="form-label">Price</label>
-                                                <input type="number" name="price" value="{{ old('price', $product->price) }}"
-                                                    step="0.01"
-                                                    class="form-control @error('price') is-invalid @enderror" required>
-                                                @error('price')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
+                                                    <div class="row g-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Name</label>
+                                                            <input type="text" name="name" value="{{ old('name', $product->name) }}" class="form-control @error('name') is-invalid @enderror" required>
+                                                            @error('name')
+                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                            @enderror
+                                                        </div>
 
-                                            <div class="col-md-12">
-                                                <label class="form-label">Description</label>
-                                                <textarea name="description" class="form-control @error('description') is-invalid @enderror" rows="4">{{ old('description', $product->description) }}</textarea>
-                                                @error('description')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Price</label>
+                                                            <input type="number" name="price" value="{{ old('price', $product->price) }}" step="0.01" class="form-control @error('price') is-invalid @enderror" required>
+                                                            @error('price')
+                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                            @enderror
+                                                        </div>
 
-                                            <div class="col-md-6">
-                                                <label class="form-label">Category</label>
-                                                <select name="category_id"
-                                                    class="form-select @error('category_id') is-invalid @enderror"
-                                                    required>
-                                                    <option value="">Select a category</option>
-                                                    @foreach ($categories as $category)
-                                                        <option value="{{ $category->id }}"
-                                                            {{ old('category_id', $product->category_id) == $category->id ? 'selected' : '' }}>
-                                                            {{ $category->name }}</option>
-                                                    @endforeach
-                                                </select>
-                                                @error('category_id')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
+                                                        <div class="col-12">
+                                                            <label class="form-label">Description</label>
+                                                            <textarea name="description" class="form-control @error('description') is-invalid @enderror" rows="4">{{ old('description', $product->description) }}</textarea>
+                                                            @error('description')
+                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                            @enderror
+                                                        </div>
 
-                                            <div class="col-md-6">
-                                                <label class="form-label">Stock</label>
-                                                <input type="number" name="stock" value="{{ old('stock', $product->stock) }}"
-                                                    class="form-control @error('stock') is-invalid @enderror"
-                                                    min="0">
-                                                @error('stock')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Category</label>
+                                                            <select name="category_id" class="form-select @error('category_id') is-invalid @enderror" required>
+                                                                <option value="">Select a category</option>
+                                                                @foreach ($categories as $category)
+                                                                    <option value="{{ $category->id }}" {{ old('category_id', $product->category_id) == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                            @error('category_id')
+                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                            @enderror
+                                                        </div>
 
-                                            <div class="col-md-6">
-                                                <label class="form-label">Image</label>
-                                                @if($product->image)
-                                                    <div class="mb-2">
-                                                        <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="img-thumbnail" style="max-height:150px;">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Stock</label>
+                                                            <input type="number" name="stock" value="{{ old('stock', $product->stock) }}" class="form-control @error('stock') is-invalid @enderror" min="0">
+                                                            @error('stock')
+                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                            @enderror
+                                                        </div>
+
                                                     </div>
-                                                @endif
-                                                <input type="file" name="image"
-                                                    class="form-control @error('image') is-invalid @enderror"
-                                                    accept="image/*">
+
+                                            </div>
+                                            <div class="card-footer d-flex justify-content-between align-items-center">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" value="1" id="status" name="status" {{ old('status', $product->status) ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="status">Active</label>
+                                                </div>
+
+                                                <div class="d-flex gap-2">
+                                                    <a href="{{ route('admin.products.index') }}" class="btn btn-outline-secondary">Cancel</a>
+                                                    <button class="btn btn-primary" type="submit">Save Product</button>
+                                                </div>
+                                            </div>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-4">
+                                        <div class="card mb-4">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">Product Images</h6>
+                                                <small class="text-muted d-block">Drag to reorder</small>
+                                            </div>
+                                            <div class="card-body">
+                                                <div id="imageSortable" class="d-flex flex-wrap gap-3 border p-2 rounded">
+                                                    @foreach ($product->images->sortBy('position') as $image)
+                                                        <div class="image-item" data-id="{{ $image->id }}">
+                                                            <div class="position-relative">
+                                                                <img src="{{ asset('storage/' . $image->image) }}" class="img-thumbnail" style="width:120px;height:120px;object-fit:cover">
+
+                                                                {{-- DELETE --}}
+                                                                <button type="button" class="delete-btn" data-url="{{ route('admin.product-images.destroy', $image->id) }}" onclick="confirmImageDelete({{ $image->id }}, this)" aria-label="Delete image">&times;</button>
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+
                                                 @error('image')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
+                                        </div>
+                                    </div>
+                                </div>
 
-                                            <div class="col-md-6 d-flex align-items-center">
-                                                <div class="form-check mt-4">
-                                                    <input class="form-check-input" type="checkbox" value="1"
-                                                        id="status" name="status"
-                                                        {{ old('status', $product->status) ? 'checked' : '' }}>
-                                                    <label class="form-check-label" for="status">Active</label>
+                                <div class="row gx-4">
+                                    <div class="col-lg-8">
+                                        <div class="card">
+                                            <div class="card-header d-flex align-items-center justify-content-between">
+                                                <h5 class="mb-0">Product Variants</h5>
+
+                                                <form method="POST" action="{{ route('admin.product-variants.store') }}" class="d-flex gap-2 ms-2">
+                                                    @csrf
+                                                    <input type="hidden" name="product_id" value="{{ $product->id }}">
+
+                                                    <input type="text" name="size" class="form-control form-control-sm" placeholder="Size (S, M, L)" required>
+                                                    <input type="text" name="color" class="form-control form-control-sm" placeholder="Color" required>
+                                                    <input type="number" name="stock" class="form-control form-control-sm" placeholder="Stock" required>
+                                                    <button class="btn btn-primary btn-sm">Add Variant</button>
+                                                </form>
+                                            </div>
+                                            <div class="card-body p-0">
+                                                <div class="table-responsive">
+                                                    <table class="table mb-0">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Size</th>
+                                                                <th>Color</th>
+                                                                <th>Stock</th>
+                                                                <th width="80">Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @forelse ($product->variants as $variant)
+                                                                <tr>
+                                                                    <td>{{ $variant->size }}</td>
+                                                                    <td>{{ $variant->color }}</td>
+                                                                    <td>{{ $variant->stock }}</td>
+                                                                    <td>
+                                                                        <form method="POST" action="{{ route('admin.product-variants.destroy', $variant->id) }}" class="delete-variant-form d-inline">
+                                                                            @csrf
+                                                                            @method('DELETE')
+                                                                            <button type="button" class="btn btn-sm btn-danger delete-variant-btn" data-id="{{ $variant->id }}">×</button>
+                                                                        </form>
+                                                                    </td>
+                                                                </tr>
+                                                            @empty
+                                                                <tr>
+                                                                    <td colspan="4" class="text-center text-muted">No variants added</td>
+                                                                </tr>
+                                                            @endforelse
+                                                        </tbody>
+                                                    </table>
                                                 </div>
                                             </div>
+                                        </div>
+                                    </div>
 
-                                            <div class="col-9">
-                                                <button class="btn btn-primary w-100" type="submit">Save Product</button>
+                                    <div class="col-lg-4">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">Product Info</h6>
                                             </div>
-                                            <div class="col-3">
-                                                <a href="{{ route('admin.products.index') }}"
-                                                    class="btn btn-secondary ms-2">Cancel</a>
-
+                                            <div class="card-body">
+                                                <p class="mb-2"><strong>SKU:</strong> {{ $product->sku ?? 'N/A' }}</p>
+                                                <p class="mb-2"><strong>Created:</strong> {{ optional($product->created_at)->format('Y-m-d') ?? '—' }}</p>
+                                                <p class="mb-0"><strong>Updated:</strong> {{ optional($product->updated_at)->format('Y-m-d') ?? '—' }}</p>
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
 
-                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -341,4 +416,114 @@
     </main>
     <!--! ================================================================ !-->
     <!--! [End] Main Content !-->
+
+    {{-- js for images  --}}
+    @push('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                if (typeof Sortable === 'undefined') {
+                    console.error('Sortable is not loaded');
+                    return;
+                }
+
+                const el = document.getElementById('imageSortable');
+                if (!el) return;
+
+                const sortable = new Sortable(el, {
+                    animation: 150,
+                    onEnd: function() {
+                        let order = [];
+
+                        document.querySelectorAll('.image-item').forEach((el, index) => {
+                            order.push({
+                                id: el.dataset.id,
+                                position: index
+                            });
+                        });
+
+                        fetch('{{ route('admin.product-images.reorder') }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: JSON.stringify({
+                                    order
+                                })
+                            }).then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    console.log('Order saved');
+                                } else {
+                                    console.error('Failed to save order', data);
+                                }
+                            }).catch(err => console.error('Reorder error', err));
+                    }
+                });
+
+                // Image delete via AJAX (so we avoid nested form _method collisions)
+                window.confirmImageDelete = function(id, btn) {
+                    const url = btn.getAttribute('data-url');
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: 'This will permanently delete the image.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, delete it!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const token = document.querySelector('meta[name="csrf-token"]').getAttribute(
+                                'content');
+                            fetch(url, {
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': token,
+                                    'Accept': 'application/json'
+                                }
+                            }).then(res => {
+                                if (!res.ok) throw new Error('Network response was not ok');
+                                return res.json();
+                            }).then(data => {
+                                if (data.success) {
+                                    const item = document.querySelector('.image-item[data-id="' +
+                                        id + '"]');
+                                    if (item) item.remove();
+                                    Swal.fire('Deleted!', 'Image deleted successfully.', 'success');
+                                } else {
+                                    Swal.fire('Error', 'Could not delete image', 'error');
+                                }
+                            }).catch(err => {
+                                console.error('Delete error', err);
+                                Swal.fire('Error', 'Could not delete image', 'error');
+                            });
+                        }
+                    });
+                }
+                // Variant delete confirmation using SweetAlert2
+                document.querySelectorAll('.delete-variant-btn').forEach(function(btn) {
+                    btn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const form = this.closest('form');
+                        Swal.fire({
+                            title: 'Are you sure?',
+                            text: 'This will delete the variant.',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Yes, delete it!'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                form.submit();
+                            }
+                        });
+                    });
+                });
+            });
+        </script>
+    @endpush
 @endsection

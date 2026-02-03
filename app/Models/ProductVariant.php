@@ -4,16 +4,23 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ProductImage extends Model
+class ProductVariant extends Model
 {
     //
     protected $fillable = [
         'product_id',
-        'image',
-         'position',
+        'size',
+        'color',
+        'stock',
     ];
+
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class, 'variant_id');
     }
 }

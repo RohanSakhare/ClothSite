@@ -9,6 +9,8 @@ use App\Http\Controllers\HomeController;
 // admin routes
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\ProductImageController as AdminProductImageController;
+use App\Http\Controllers\Admin\ProductVariantController as AdminProductVariantController;
 
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -23,8 +25,9 @@ Route::get('/product/{product:slug}', [ProductController::class, 'show'])->name(
 // cart route
 Route::get('/cart', [CartController::class, 'cart'])->name('cart.index');
 Route::post('/cart/add/{product}', [CartController::class, 'add'])->name('cart.add');
-Route::post('/cart/update/{product}', [CartController::class, 'update'])->name('cart.update');
-Route::post('/cart/remove/{product}', [CartController::class, 'remove'])->name('cart.remove');
+Route::post('/cart/update/{cartItem}', [CartController::class, 'update'])->name('cart.update');
+Route::post('/cart/remove/{cartItem}', [CartController::class, 'remove'])->name('cart.remove');
+Route::post('/cart/apply', [CartController::class, 'apply'])->name('cart.apply');
 
 
 
@@ -43,14 +46,25 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
         return view('dashboard.index');
     })->name('dashboard');
 
-    // products 
+    // products
     Route::get('products/data', [AdminProductController::class, 'data'])->name('products.data');
     Route::resource('products', AdminProductController::class);
 
     // categories
     Route::get('categories/data', [AdminCategoryController::class, 'data'])->name('categories.data');
     Route::resource('categories', AdminCategoryController::class)->except(['create', 'edit', 'show']);
-    
+
+    // image sorting
+    Route::post('/product-images/reorder', [AdminProductImageController::class, 'reorderImages'])->name('product-images.reorder');
+    Route::delete('product-images/{image}', [AdminProductImageController::class, 'destroy'])->name('product-images.destroy');
+
+    // product variants
+    Route::post('/admin/product-variants', [AdminProductVariantController::class, 'store'])
+    ->name('product-variants.store');
+
+Route::delete('/admin/product-variants/{productVariant}', [AdminProductVariantController::class, 'destroy'])
+    ->name('product-variants.destroy');
+
 });
 
 require __DIR__ . '/auth.php';
